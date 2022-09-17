@@ -18,8 +18,6 @@ type Cond interface {
 	GeRaw(field string, rawValue interface{})
 	Like(field string, value interface{})
 	LikeRaw(field string, rawValue interface{})
-	ILike(field string, value interface{})
-	ILikeRaw(field string, rawValue interface{})
 	In(field string, value ...interface{})
 	InRaw(field string, value ...interface{})
 	InSelect(field string, f func(b SelectStatement))
@@ -112,14 +110,6 @@ func (st *cond) Like(field string, value interface{}) {
 
 func (st *cond) LikeRaw(field string, rawValue interface{}) {
 	st.OpRaw(field, "like", rawValue)
-}
-
-func (st *cond) ILike(field string, value interface{}) {
-	st.Op(field, "ilike", value)
-}
-
-func (st *cond) ILikeRaw(field string, rawValue interface{}) {
-	st.OpRaw(field, "ilike", rawValue)
 }
 
 func (st *cond) In(field string, value ...interface{}) {
