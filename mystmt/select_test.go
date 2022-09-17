@@ -156,7 +156,7 @@ func TestSelect(t *testing.T) {
 				})
 				b.GroupBy("id", "name")
 			}),
-			"select id, name, count(*) from users left join (select user_id, data from event) t on (t.user_id = users.id) group by (id, name)",
+			"select id, name, count(*) from users left join (select user_id, data from event) t on (t.user_id = users.id) group by id, name",
 			nil,
 		},
 		{
@@ -169,7 +169,7 @@ func TestSelect(t *testing.T) {
 					b.LtRaw("max(temp_lo)", 40)
 				})
 			}),
-			"select city, max(temp_lo) from weather group by (city) having (max(temp_lo) < 40)",
+			"select city, max(temp_lo) from weather group by city having (max(temp_lo) < 40)",
 			nil,
 		},
 		{

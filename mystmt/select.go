@@ -251,7 +251,7 @@ func (st *selectStmt) make() *buffer {
 		b.push("where", &st.where)
 	}
 	if !st.groupBy.empty() {
-		b.push("group by", paren(&st.groupBy))
+		b.push("group by", &st.groupBy)
 	}
 	if !st.having.empty() {
 		b.push("having", &st.having)
