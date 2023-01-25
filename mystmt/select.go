@@ -35,6 +35,7 @@ type SelectStatement interface {
 	OrderBy(col string) OrderBy
 	Limit(n int64)
 	Offset(n int64)
+	UnionSelect(f func(b SelectStatement))
 }
 
 type Distinct interface {
@@ -69,6 +70,7 @@ type selectStmt struct {
 	orderBy  group
 	limit    *int64
 	offset   *int64
+	union    buffer
 }
 
 func (st *selectStmt) Distinct() Distinct {
@@ -225,6 +227,13 @@ func (st *selectStmt) Offset(n int64) {
 	st.offset = &n
 }
 
+func (st *selectStmt) UnionSelect(f func(b SelectStatement)) {
+	var x selectStmt
+	f(&x)
+
+	st.union.push(x.make())
+}
+
 func (st *selectStmt) make() *buffer {
 	var b buffer
 	b.push("select")
@@ -264,6 +273,9 @@ func (st *selectStmt) make() *buffer {
 	}
 	if st.offset != nil {
 		b.push("offset", *st.offset)
+	}
+	if !st.union.empty() {
+		b.push("union", &st.union)
 	}
 
 	return &b

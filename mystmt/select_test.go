@@ -379,6 +379,24 @@ func TestSelect(t *testing.T) {
 			`,
 			nil,
 		},
+		{
+			"union select",
+			mystmt.Select(func(b mystmt.SelectStatement) {
+				b.Columns("id")
+				b.From("table1")
+				b.UnionSelect(func(b mystmt.SelectStatement) {
+					b.Columns("id")
+					b.From("table2")
+				})
+			}),
+			`
+				select id
+				from table1
+				union select id
+				from table2
+			`,
+			nil,
+		},
 	}
 
 	for _, tC := range cases {
