@@ -20,10 +20,14 @@ type SelectStatement interface {
 	LeftJoin(table string) Join
 	RightJoin(table string) Join
 	JoinSelect(f func(b SelectStatement), as string) Join
+	JoinUnion(f func(b UnionStatement), as string) Join
 	InnerJoinSelect(f func(b SelectStatement), as string) Join
+	InnerJoinUnion(f func(b UnionStatement), as string) Join
 	FullOuterJoinSelect(f func(b SelectStatement), as string) Join
 	LeftJoinSelect(f func(b SelectStatement), as string) Join
+	LeftJoinUnion(f func(b UnionStatement), as string) Join
 	RightJoinSelect(f func(b SelectStatement), as string) Join
+	RightJoinUnion(f func(b UnionStatement), as string) Join
 	JoinLateralSelect(f func(b SelectStatement), as string) Join
 	InnerJoinLateralSelect(f func(b SelectStatement), as string) Join
 	FullOuterJoinLateralSelect(f func(b SelectStatement), as string) Join
@@ -157,12 +161,38 @@ func (st *selectStmt) joinSelect(typ string, f func(b SelectStatement), as strin
 	return &j
 }
 
+func (st *selectStmt) joinUnion(typ string, f func(b UnionStatement), as string) Join {
+	var x unionStmt
+	f(&x)
+
+	var b buffer
+	b.push(paren(x.make()))
+	if as != "" {
+		b.push(as)
+	}
+
+	j := join{
+		typ:   typ,
+		table: &b,
+	}
+	st.joins.push(&j)
+	return &j
+}
+
 func (st *selectStmt) JoinSelect(f func(b SelectStatement), as string) Join {
 	return st.joinSelect("join", f, as)
 }
 
+func (st *selectStmt) JoinUnion(f func(b UnionStatement), as string) Join {
+	return st.joinUnion("join", f, as)
+}
+
 func (st *selectStmt) InnerJoinSelect(f func(b SelectStatement), as string) Join {
 	return st.joinSelect("inner join", f, as)
+}
+
+func (st *selectStmt) InnerJoinUnion(f func(b UnionStatement), as string) Join {
+	return st.joinUnion("inner join", f, as)
 }
 
 func (st *selectStmt) FullOuterJoinSelect(f func(b SelectStatement), as string) Join {
@@ -173,8 +203,16 @@ func (st *selectStmt) LeftJoinSelect(f func(b SelectStatement), as string) Join 
 	return st.joinSelect("left join", f, as)
 }
 
+func (st *selectStmt) LeftJoinUnion(f func(b UnionStatement), as string) Join {
+	return st.joinUnion("left join", f, as)
+}
+
 func (st *selectStmt) RightJoinSelect(f func(b SelectStatement), as string) Join {
 	return st.joinSelect("right join", f, as)
+}
+
+func (st *selectStmt) RightJoinUnion(f func(b UnionStatement), as string) Join {
+	return st.joinUnion("right join", f, as)
 }
 
 func (st *selectStmt) JoinLateralSelect(f func(b SelectStatement), as string) Join {
